@@ -1,6 +1,1 @@
-{
-  "buildCommand": "cd artifacts/china-source-student && pnpm build",
-  "outputDirectory": "artifacts/china-source-student/dist",
-  "installCommand": "pnpm install",
-  "framework": "vite"
-}
+{"buildCommand": "cd artifacts/china-source-student && pnpm build", "outputDirectory": "artifacts/china-source-student/dist", "installCommand": "pnpm install"}
