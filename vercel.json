@@ -1,1 +1,0 @@
-{"buildCommand": "cd artifacts/china-source-student && pnpm build", "outputDirectory": "artifacts/china-source-student/dist"}
