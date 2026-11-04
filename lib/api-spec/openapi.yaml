@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: student-profiles
+    description: Account-owned and community-visible student sourcing profiles
 paths:
   /healthz:
     get:
@@ -24,6 +26,71 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /student-profile/me:
+    get:
+      operationId: getMyStudentProfile
+      tags: [student-profiles]
+      summary: Get the signed-in student's profile
+      responses:
+        "200":
+          description: The student's private profile, if one has been saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyStudentProfileResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: saveMyStudentProfile
+      tags: [student-profiles]
+      summary: Create or update the signed-in student's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentProfileInput"
+      responses:
+        "200":
+          description: The saved private profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentProfile"
+        "400":
+          description: Invalid profile or consent combination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /student-profiles:
+    get:
+      operationId: listCommunityStudentProfiles
+      tags: [student-profiles]
+      summary: List profiles explicitly shared with signed-in students
+      responses:
+        "200":
+          description: Community-visible profiles with contact hidden unless separately shared
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityStudentProfilesResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +100,139 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    StudentProfileInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 120
+        origin:
+          type: string
+          minLength: 1
+          maxLength: 120
+        university:
+          type: string
+          minLength: 1
+          maxLength: 180
+        chinaCity:
+          type: string
+          minLength: 1
+          maxLength: 100
+        interests:
+          type: array
+          minItems: 1
+          maxItems: 8
+          items:
+            type: string
+            minLength: 1
+            maxLength: 80
+        contact:
+          type: ["string", "null"]
+          maxLength: 180
+        shareWithCommunity:
+          type: boolean
+        shareContact:
+          type: boolean
+      required:
+        - fullName
+        - origin
+        - university
+        - chinaCity
+        - interests
+        - contact
+        - shareWithCommunity
+        - shareContact
+    StudentProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        origin:
+          type: string
+        university:
+          type: string
+        chinaCity:
+          type: string
+        interests:
+          type: array
+          items:
+            type: string
+        contact:
+          type: ["string", "null"]
+        shareWithCommunity:
+          type: boolean
+        shareContact:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - fullName
+        - origin
+        - university
+        - chinaCity
+        - interests
+        - contact
+        - shareWithCommunity
+        - shareContact
+        - createdAt
+        - updatedAt
+    MyStudentProfileResponse:
+      type: object
+      properties:
+        profile:
+          anyOf:
+            - $ref: "#/components/schemas/StudentProfile"
+            - type: "null"
+      required: [profile]
+    CommunityStudentProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        origin:
+          type: string
+        university:
+          type: string
+        chinaCity:
+          type: string
+        interests:
+          type: array
+          items:
+            type: string
+        contact:
+          type: ["string", "null"]
+      required:
+        - id
+        - fullName
+        - origin
+        - university
+        - chinaCity
+        - interests
+        - contact
+    CommunityStudentProfilesResponse:
+      type: object
+      properties:
+        profiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommunityStudentProfile"
+      required: [profiles]
 
